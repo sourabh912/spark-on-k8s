@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "spark-hs.fullname" . }}
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}/{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: historyport
@@ -36,7 +36,9 @@ spec:
                 -Dspark.history.fs.logDirectory=file:/mnt/$eventsDir";
               else
                 export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS \
-                -Dspark.history.fs.logDirectory=$eventsDir";
+                -Dspark.history.fs.logDirectory=$eventsDir \
+                -Dspark.hadoop.fs.s3n.awsAccessKeyId=$accessKey \
+                -Dspark.hadoop.fs.s3n.awsSecretAccessKey=$secretKey";
               fi;
               /opt/spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer;
           envFrom:
